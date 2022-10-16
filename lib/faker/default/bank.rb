@@ -51,6 +51,9 @@ module Faker
         # Use Faker::Base.regexify for creating a sample from bank account format regex
         account = Base.regexify(/#{pattern}/)
 
+        # Calculate national check digits if necessary
+        account = national_check_digit(account, country_code)
+
         # Add country code and checksum to the generated account to form valid IBAN
         country_code.upcase + iban_checksum(country_code, account) + account
       end
@@ -165,11 +168,45 @@ module Faker
           d =~ /[A-Z]/ ? (d.ord - 55).to_s : d
         end.join.to_i
 
-        # This is answer to (iban_to_num + checksum) % 97 == 1
-        checksum = (1 - account_to_number) % 97
+        # This is the correct answer to (iban_to_num + checksum) % 97 == 1
+        checksum = 98 - (account_to_number % 97)
 
         # Use leftpad to make the size always to 2
         checksum.to_s.rjust(2, '0')
+      end
+
+      # Calculates the national check digit for France's specific ISO 7064 MOD-97-10 implementation
+      # https://en.wikipedia.org/wiki/International_Bank_Account_Number#National_check_digits
+      def national_check_digit(account, country_code)
+        rules = begin
+          translate("faker.bank.iban_details.#{country_code.downcase}.national_check_digit")
+        rescue I18n::MissingTranslationData
+          nil
+        end
+
+        return account if rules.nil?
+
+        # Convert letters to numbers
+        numeric_account = account.upcase.chars.map do |d|
+          coding = rules[:coding].detect { |coding_rule| Regexp.new(coding_rule[:pattern]).match(d) }
+          coding ? (d.ord - coding[:ordinal_offset]) : d
+        end.join
+
+        # Zero out where check digit would be
+        position = rules[:position] - 1 # Account for zero-index
+        (position...(position + rules[:length])).each do |index|
+          numeric_account[index] = '0'
+        end
+
+        # Calculate modulus
+        remainder = numeric_account.to_i % rules[:modulo]
+
+        # Apply complement if necessary
+        complement = rules[:complement]
+        check_digit = complement.nil? ? remainder : complement - remainder
+
+        # Use leftpad to make the size always to 2
+        account + check_digit.to_s.rjust(2, '0')
       end
 
       def valid_routing_number

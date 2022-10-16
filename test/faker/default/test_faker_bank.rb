@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 require_relative '../../test_helper'
+require 'ibandit'
 
 class TestFakerBank < Test::Unit::TestCase
   IBAN_HEADER = '[A-Z]{2}[0-9]{2}'
+  IBAN_ITERATION_AMOUNT = 1000
 
   def setup
     @tester = Faker::Bank
@@ -217,16 +219,22 @@ class TestFakerBank < Test::Unit::TestCase
 
   # France
   def test_iban_fr
-    account = @tester.iban(country_code: 'fr')
-    assert_equal(27, account.length)
-    assert_match(/^#{IBAN_HEADER}\d{10}[A-Z0-9]{11}\d{2}$/, account)
+    IBAN_ITERATION_AMOUNT.times do
+      account = @tester.iban(country_code: 'fr')
+      assert_equal(27, account.length)
+      assert_match(/^#{IBAN_HEADER}\d{10}[A-Z0-9]{11}\d{2}$/, account)
+      assert_predicate Ibandit::IBAN.new(account), :valid?
+    end
   end
 
   # United Kingdom
   def test_iban_gb
-    account = @tester.iban(country_code: 'gb')
-    assert_equal(22, account.length)
-    assert_match(/^#{IBAN_HEADER}[A-Z]{4}\d{14}$/, account)
+    IBAN_ITERATION_AMOUNT.times do
+      account = @tester.iban(country_code: 'gb')
+      assert_equal(22, account.length)
+      assert_match(/^#{IBAN_HEADER}[A-Z]{4}\d{14}$/, account)
+      assert_predicate Ibandit::IBAN.new(account), :valid?
+    end
   end
 
   # Georgia
@@ -442,9 +450,12 @@ class TestFakerBank < Test::Unit::TestCase
 
   # Portugal
   def test_iban_pt
-    account = @tester.iban(country_code: 'pt')
-    assert_equal(25, account.length)
-    assert_match(/^#{IBAN_HEADER}\d{21}$/, account)
+    IBAN_ITERATION_AMOUNT.times do
+      account = @tester.iban(country_code: 'pt')
+      assert_equal(25, account.length)
+      assert_match(/^#{IBAN_HEADER}\d{21}$/, account)
+      assert_predicate Ibandit::IBAN.new(account), :valid?
+    end
   end
 
   # Qatar
@@ -463,9 +474,12 @@ class TestFakerBank < Test::Unit::TestCase
 
   # Serbia
   def test_iban_rs
-    account = @tester.iban(country_code: 'rs')
-    assert_equal(22, account.length)
-    assert_match(/^#{IBAN_HEADER}\d{18}$/, account)
+    IBAN_ITERATION_AMOUNT.times do
+      account = @tester.iban(country_code: 'rs')
+      assert_equal(22, account.length)
+      assert_match(/^#{IBAN_HEADER}\d{18}$/, account)
+      assert_predicate Ibandit::IBAN.new(account), :valid?
+    end
   end
 
   # Saudi Arabia

@@ -115,7 +115,22 @@ en:
         fr:
           # France
           length: 27
-          bban_pattern: '\d{10}[A-Z0-9]{11}\d{2}'
+          bban_pattern: '\d{10}[A-Z0-9]{11}'
+          national_check_digit:
+            length: 2
+            position: 22
+            modulo: 97
+            complement: 97
+            coding:
+              -
+                pattern: '[A-I]'
+                ordinal_offset: 64
+              -
+                pattern: '[J-R]'
+                ordinal_offset: 73
+              -
+                pattern: '[S-Z]'
+                ordinal_offset: 81
         gb:
           # United Kingdom
           length: 22
@@ -243,7 +258,16 @@ en:
         pt:
           # Portugal
           length: 25
-          bban_pattern: '\d{21}'
+          bban_pattern: '\d{19}'
+          national_check_digit:
+            length: 2
+            position: 20
+            modulo: 97
+            complement: 98
+            coding:
+              -
+                pattern: '[A-Z]'
+                ordinal_offset: 55
         qa:
           # Qatar
           length: 29
@@ -255,7 +279,16 @@ en:
         rs:
           # Serbia
           length: 22
-          bban_pattern: '\d{18}'
+          bban_pattern: '\d{16}'
+          national_check_digit:
+            length: 2
+            position: 17
+            modulo: 97
+            complement: 98
+            coding:
+              -
+                pattern: '[A-Z]'
+                ordinal_offset: 55
         sa:
           # Saudi Arabia
           length: 24
